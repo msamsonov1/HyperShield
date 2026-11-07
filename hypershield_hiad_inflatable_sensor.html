@@ -1,0 +1,1546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HyperShield: Inflatable Heatshield Aerodynamic Flare Distort Sensor</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- MathJax v3 Bulletproof Configuration -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']]
+      },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #05070d;
+      color: #e2e8f0;
+      overflow-x: hidden;
+    }
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .formula-box {
+      background-color: #030712;
+      border: 1px solid #1f2937;
+      border-radius: 0.5rem;
+      padding: 0.85rem;
+      text-align: center;
+      color: #38bdf8;
+      overflow-x: auto;
+      margin: 0.75rem 0;
+    }
+    /* Custom Slider Styling */
+    input[type=range] {
+      -webkit-appearance: none;
+      background: #1e293b;
+      height: 6px;
+      border-radius: 3px;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      height: 16px;
+      width: 16px;
+      border-radius: 50%;
+      background: #06b6d4;
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(6, 182, 212, 0.7);
+    }
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0b0f19;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #334155;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col bg-[#05070d] text-slate-200">
+
+  <!-- Top App Navigation Bar -->
+  <header class="border-b border-gray-800 bg-[#080c14]/90 sticky top-0 z-50 backdrop-blur-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="p-2 bg-cyan-950/70 border border-cyan-500/40 rounded-lg text-cyan-400">
+          <i data-lucide="shield-alert" class="w-6 h-6 text-cyan-400"></i>
+        </div>
+        <div>
+          <div class="flex items-center space-x-2">
+            <span class="font-bold text-lg tracking-tight text-white flex items-center gap-1.5">
+              HYPERSHIELD <span class="text-xs px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-mono border border-cyan-500/30">HIAD-FD-01</span>
+            </span>
+            <span class="text-xs text-amber-400 font-mono border border-amber-500/30 px-2 py-0.5 rounded bg-amber-500/10">TRL 4 &rarr; 6</span>
+          </div>
+          <p class="text-xs text-slate-400">Hypersonic Inflatable Aerodynamic Decelerator Flare Distort &amp; Trim Inversion</p>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="flex space-x-1 sm:space-x-2 bg-gray-950/80 p-1 rounded-xl border border-gray-800">
+        <button id="tabBtnSim" onclick="switchTab('sim')" class="px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all text-white bg-cyan-600/30 border border-cyan-500/40 shadow-sm flex items-center gap-1.5">
+          <i data-lucide="activity" class="w-3.5 h-3.5"></i>
+          <span>Live Sim &amp; Telemetry</span>
+        </button>
+        <button id="tabBtnPhysics" onclick="switchTab('physics')" class="px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all text-slate-400 hover:text-white flex items-center gap-1.5">
+          <i data-lucide="atom" class="w-3.5 h-3.5"></i>
+          <span>Core Physics</span>
+        </button>
+        <button id="tabBtnProposal" onclick="switchTab('proposal')" class="px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all text-slate-400 hover:text-white flex items-center gap-1.5">
+          <i data-lucide="file-check-2" class="w-3.5 h-3.5"></i>
+          <span>NASA Proposal</span>
+        </button>
+        <button id="tabBtnARR" onclick="switchTab('arr')" class="px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all text-slate-400 hover:text-white flex items-center gap-1.5">
+          <i data-lucide="trending-up" class="w-3.5 h-3.5"></i>
+          <span>Commercial ARR</span>
+        </button>
+      </nav>
+
+      <!-- System Readiness Badge -->
+      <div class="hidden lg:flex items-center space-x-3">
+        <div class="flex flex-col text-right">
+          <span class="text-[11px] text-slate-400 font-mono">AUTONOMOUS OBSERVER</span>
+          <span id="systemStatusBadge" class="text-xs font-mono font-semibold text-emerald-400 flex items-center justify-end gap-1">
+            <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span> NOMINAL BALANCE
+          </span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full">
+
+    <!-- ========================================================================= -->
+    <!-- TAB 1: LIVE SIMULATION & TELEMETRY HUD (#viewSim)                          -->
+    <!-- ========================================================================= -->
+    <div id="viewSim" class="space-y-6">
+      
+      <!-- Top Alert Bar when fault injected -->
+      <div id="simAlertBanner" class="hidden bg-rose-950/50 border border-rose-500/50 rounded-xl p-3.5 items-center justify-between transition-all">
+        <div class="flex items-center space-x-3">
+          <div class="p-2 bg-rose-600/20 text-rose-400 rounded-lg animate-pulse">
+            <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <div class="text-sm font-semibold text-rose-300 font-mono flex items-center gap-2">
+              CRITICAL ANOMALY: ASYMMETRIC TORUS BLADDER RUPTURE DETECTED
+            </div>
+            <p class="text-xs text-rose-200/80">Strap tension loss during peak drag $(a=14.2\,g, \Delta F=-46.8\%)$. Center-of-Mass Trim Actuator firing: <span id="trimFiringVal" class="text-white font-mono font-bold">+28.4 mm Offset</span>.</p>
+          </div>
+        </div>
+        <button onclick="resetSimulation()" class="text-xs px-3 py-1.5 bg-rose-600 hover:bg-rose-500 text-white rounded font-mono font-medium transition-all">
+          Re-pressurize &amp; Reset
+        </button>
+      </div>
+
+      <!-- Main Flight Hardware Canvas & Primary Phase-Space Graph -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Interactive Canvas: Re-entry Aeroshell Cross-Section -->
+        <div class="lg:col-span-7 bg-[#080c14] border border-gray-800 rounded-2xl p-4 flex flex-col justify-between shadow-xl relative overflow-hidden">
+          <div class="flex items-center justify-between pb-3 border-b border-gray-800/80">
+            <div class="flex items-center space-x-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping"></span>
+              <span class="font-mono text-xs uppercase tracking-wider text-cyan-300 font-semibold">HIAD 6.0m Aeroshell Finite Deflection</span>
+            </div>
+            <div class="flex items-center space-x-4 text-xs font-mono text-slate-400">
+              <span>Mach: <span id="teleMach" class="text-cyan-400 font-bold">19.4</span></span>
+              <span>Alt: <span id="teleAlt" class="text-white font-bold">58.2 km</span></span>
+              <span>$q_\infty$: <span id="teleQ" class="text-amber-400 font-bold">42.8 kPa</span></span>
+            </div>
+          </div>
+
+          <!-- The Rendered Canvas -->
+          <div class="relative w-full h-[330px] my-2 rounded-xl bg-[#03050a] border border-gray-900 overflow-hidden flex items-center justify-center">
+            <canvas id="aeroshellCanvas" class="w-full h-full block"></canvas>
+            
+            <!-- Canvas HUD Overlay Badges -->
+            <div class="absolute top-3 left-3 bg-gray-950/80 backdrop-blur border border-gray-800 px-2.5 py-1 rounded text-[11px] font-mono text-slate-300">
+              Toroid 1-6 Press: <span id="hudPressure" class="text-emerald-400 font-semibold">142 kPa</span>
+            </div>
+            <div class="absolute top-3 right-3 bg-gray-950/80 backdrop-blur border border-gray-800 px-2.5 py-1 rounded text-[11px] font-mono text-slate-300 flex items-center gap-1.5">
+              <span>Trim CoM Offset:</span>
+              <span id="hudCoM" class="text-cyan-400 font-semibold font-mono">0.0 mm</span>
+            </div>
+            <div class="absolute bottom-3 left-3 bg-gray-950/80 backdrop-blur border border-gray-800 px-2.5 py-1 rounded text-[10px] font-mono text-slate-400">
+              Sensor Array: FBG Kevlar Fiber Strain (200 Hz Interrogator)
+            </div>
+          </div>
+
+          <!-- Bottom Micro Status Bar -->
+          <div class="grid grid-cols-4 gap-2 pt-2 border-t border-gray-800/80 text-center font-mono">
+            <div class="p-2 rounded-lg bg-gray-900/60 border border-gray-800">
+              <div class="text-[10px] text-slate-400">Aero Decel ($a$)</div>
+              <div id="statAccel" class="text-sm font-bold text-cyan-400">4.12 g</div>
+            </div>
+            <div class="p-2 rounded-lg bg-gray-900/60 border border-gray-800">
+              <div class="text-[10px] text-slate-400">Strap Tensile ($F$)</div>
+              <div id="statTension" class="text-sm font-bold text-white">18.6 kN</div>
+            </div>
+            <div class="p-2 rounded-lg bg-gray-900/60 border border-gray-800">
+              <div class="text-[10px] text-slate-400">Flare Distortion $\delta_r$</div>
+              <div id="statDeflection" class="text-sm font-bold text-emerald-400">3.4 mm</div>
+            </div>
+            <div class="p-2 rounded-lg bg-gray-900/60 border border-gray-800">
+              <div class="text-[10px] text-slate-400">Tumble Risk</div>
+              <div id="statTumble" class="text-sm font-bold text-emerald-400">0.02%</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Primary Diagnostic Phase-Space Chart: Acceleration (a) vs Force (F) -->
+        <div class="lg:col-span-5 bg-[#080c14] border border-gray-800 rounded-2xl p-4 flex flex-col justify-between shadow-xl">
+          <div class="flex items-center justify-between pb-2 border-b border-gray-800">
+            <div>
+              <h2 class="text-xs font-mono uppercase tracking-wider text-cyan-300 font-bold flex items-center gap-1.5">
+                <i data-lucide="scatter-chart" class="w-4 h-4 text-cyan-400"></i>
+                Phase-Space: Decel ($a$) vs Strap Force ($F$)
+              </h2>
+              <p class="text-[11px] text-slate-400">Dynamic flare tracking corridor &amp; deflation tripwire</p>
+            </div>
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-950 text-cyan-400 border border-cyan-800">LIVE COUPLING</span>
+          </div>
+
+          <div class="relative w-full h-[270px] my-2">
+            <canvas id="phaseSpaceChart"></canvas>
+          </div>
+
+          <!-- Chart Annotation Legend -->
+          <div class="p-2.5 rounded-xl bg-gray-950/70 border border-gray-800/80 text-[11px] text-slate-300 space-y-1">
+            <div class="flex items-center justify-between">
+              <span class="flex items-center gap-1.5 font-mono text-[10px]">
+                <span class="w-3 h-0.5 bg-cyan-400 inline-block"></span> Nominal Aero-Structural Corridor
+              </span>
+              <span class="flex items-center gap-1.5 font-mono text-[10px]">
+                <span class="w-3 h-0.5 bg-rose-500 border border-dashed border-rose-500 inline-block"></span> Bladder Rupture Hazard Threshold
+              </span>
+            </div>
+            <p class="text-[10px] text-slate-400 leading-tight">
+              A rupture causes an immediate vertical collapse in $F$ at high $a$. HyperShield detects the $(a, F)$ phase divergence within 12 ms.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Secondary Telemetry Plots & Closed-Loop Control System -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Closed-Loop Control Sliders & Fault Injector -->
+        <div class="lg:col-span-5 bg-[#080c14] border border-gray-800 rounded-2xl p-5 shadow-xl flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between pb-3 border-b border-gray-800">
+              <span class="font-mono text-xs uppercase tracking-wider text-slate-300 font-semibold flex items-center gap-2">
+                <i data-lucide="sliders" class="w-4 h-4 text-cyan-400"></i>
+                Hypersonic Environment &amp; Actuation
+              </span>
+              <span class="text-[10px] font-mono text-emerald-400 bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-800">
+                ACTIVE CLOSED-LOOP
+              </span>
+            </div>
+
+            <div class="space-y-4 my-4">
+              <!-- Slider 1: Re-entry Dynamic Pressure -->
+              <div>
+                <div class="flex justify-between text-xs mb-1">
+                  <span class="text-slate-300">Dynamic Atmospheric Drag (Decel $a$):</span>
+                  <span id="sliderValDecel" class="font-mono text-cyan-400 font-bold">4.2 g</span>
+                </div>
+                <input id="sliderDecel" type="range" min="1" max="22" step="0.1" value="4.2" class="w-full" oninput="updateControls()">
+                <div class="flex justify-between text-[10px] text-slate-400 font-mono mt-0.5">
+                  <span>1.0 g (Entry Interface)</span>
+                  <span>Peak Aero Heating (22.0 g)</span>
+                </div>
+              </div>
+
+              <!-- Slider 2: Atmospheric Density / Inflow Angle of Attack -->
+              <div>
+                <div class="flex justify-between text-xs mb-1">
+                  <span class="text-slate-300">Angle of Attack ($\alpha$ Trim Bias):</span>
+                  <span id="sliderValAoA" class="font-mono text-amber-400 font-bold">0.0&deg;</span>
+                </div>
+                <input id="sliderAoA" type="range" min="-15" max="15" step="0.5" value="0" class="w-full" oninput="updateControls()">
+                <div class="flex justify-between text-[10px] text-slate-400 font-mono mt-0.5">
+                  <span>-15&deg; (Nose Down)</span>
+                  <span>0&deg; Ballistic</span>
+                  <span>+15&deg; (Pitch Up)</span>
+                </div>
+              </div>
+
+              <!-- Autonomous Loop Enable Checkbox -->
+              <div class="pt-2 flex items-center justify-between border-t border-gray-800">
+                <div>
+                  <div class="text-xs font-semibold text-slate-200">Autonomous CoM Trim Actuator</div>
+                  <div class="text-[11px] text-slate-400">Active mass-slider re-centers re-entry moment arm</div>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" id="autoTrimToggle" checked class="sr-only peer" onchange="toggleAutoTrim()">
+                  <div class="w-9 h-5 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-cyan-600"></div>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Fault Injection Actions -->
+          <div class="pt-4 border-t border-gray-800 space-y-2">
+            <span class="text-[11px] font-mono text-slate-400 uppercase tracking-wider block">In-Flight Fault Injection:</span>
+            <div class="grid grid-cols-2 gap-2">
+              <button onclick="injectFault('puncture')" class="px-3 py-2 bg-rose-950/70 hover:bg-rose-900 border border-rose-700/60 text-rose-300 text-xs font-medium rounded-lg flex items-center justify-center gap-1.5 transition-all">
+                <i data-lucide="zap-off" class="w-3.5 h-3.5"></i>
+                Rupture Toroid #4
+              </button>
+              <button onclick="injectFault('strapShear')" class="px-3 py-2 bg-amber-950/70 hover:bg-amber-900 border border-amber-700/60 text-amber-300 text-xs font-medium rounded-lg flex items-center justify-center gap-1.5 transition-all">
+                <i data-lucide="scissors" class="w-3.5 h-3.5"></i>
+                Shear Webbing Strap
+              </button>
+            </div>
+            <button onclick="resetSimulation()" class="w-full py-1.5 bg-gray-900 hover:bg-gray-800 border border-gray-700 text-slate-300 text-xs font-mono rounded-lg transition-all flex items-center justify-center gap-1">
+              <i data-lucide="refresh-cw" class="w-3 h-3"></i> Clear Injections &amp; Rebalance
+            </button>
+          </div>
+        </div>
+
+        <!-- Telemetry Time Series 1: Strap Tension & Deflation Tracking -->
+        <div class="lg:col-span-4 bg-[#080c14] border border-gray-800 rounded-2xl p-4 shadow-xl flex flex-col justify-between">
+          <div class="flex items-center justify-between pb-2 border-b border-gray-800">
+            <span class="font-mono text-xs uppercase tracking-wider text-slate-300 font-semibold flex items-center gap-1.5">
+              <i data-lucide="gauge" class="w-3.5 h-3.5 text-cyan-400"></i>
+              Strap Force &amp; Flare Flare Strain
+            </span>
+            <span class="text-[10px] font-mono text-slate-400">200 Hz FBG</span>
+          </div>
+          <div class="relative w-full h-[180px] my-2">
+            <canvas id="tensionTimeChart"></canvas>
+          </div>
+          <div class="text-[10px] text-slate-400 font-mono flex justify-between border-t border-gray-800/80 pt-2">
+            <span>Primary Strap: <span id="telePrimaryStrap" class="text-cyan-400">18.6 kN</span></span>
+            <span>Opposing Webbing: <span id="teleOppStrap" class="text-white">18.5 kN</span></span>
+            <span>Delta: <span id="teleDeltaStrap" class="text-emerald-400">0.1 kN</span></span>
+          </div>
+        </div>
+
+        <!-- Telemetry Time Series 2: Pitch Attitude & Actuator Counter-Moment -->
+        <div class="lg:col-span-3 bg-[#080c14] border border-gray-800 rounded-2xl p-4 shadow-xl flex flex-col justify-between">
+          <div class="flex items-center justify-between pb-2 border-b border-gray-800">
+            <span class="font-mono text-xs uppercase tracking-wider text-slate-300 font-semibold flex items-center gap-1.5">
+              <i data-lucide="compass" class="w-3.5 h-3.5 text-amber-400"></i>
+              Vehicle Trim &amp; Restoring Moment
+            </span>
+            <span class="text-[10px] font-mono text-slate-400">&Delta;CoM Servo</span>
+          </div>
+          <div class="relative w-full h-[180px] my-2">
+            <canvas id="trimTimeChart"></canvas>
+          </div>
+          <div class="text-[10px] text-slate-400 font-mono flex justify-between border-t border-gray-800/80 pt-2">
+            <span>AoA Error: <span id="teleAoAError" class="text-emerald-400">0.08&deg;</span></span>
+            <span>Motor Torque: <span id="teleMotorTorque" class="text-amber-400">12.4 N&middot;m</span></span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- TAB 2: CORE PHYSICS & MATHEMATICAL MODEL (#viewPhysics)                    -->
+    <!-- ========================================================================= -->
+    <div id="viewPhysics" class="hidden space-y-6">
+      
+      <!-- Header Banner -->
+      <div class="bg-gradient-to-r from-cyan-950/40 via-blue-950/20 to-purple-950/30 border border-cyan-800/50 rounded-2xl p-6">
+        <div class="flex items-center space-x-3 mb-2">
+          <span class="px-2.5 py-1 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 text-xs font-mono">
+            PHYSICAL GOVERNING EQUATIONS
+          </span>
+          <span class="text-slate-400 text-xs font-mono">Hypersonic Aerothermodynamic-Elastic Coupling</span>
+        </div>
+        <h2 class="text-2xl font-bold text-white tracking-tight">
+          Aero-Structural Dynamics &amp; Phase-Space State Inversion
+        </h2>
+        <p class="text-slate-300 text-sm max-w-4xl mt-2 leading-relaxed">
+          Hypersonic Inflatable Aerodynamic Decelerators (HIAD) substitute traditional rigid metallic/composite aeroshells with stacked pressurized synthetic toroids (p-phenylene terephthalamide / Kevlar bladders) wrapped in Flexible Thermal Protection Systems (FTPS). Deceleration drag directly stresses axial and radial tension webbing.
+        </p>
+      </div>
+
+      <!-- 4 Core Mathematical Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        <!-- Card 1: Hypersonic Drag to Webbing Tensile Coupling -->
+        <div class="bg-[#080c14] border border-gray-800 rounded-2xl p-5 flex flex-col justify-between shadow-lg">
+          <div>
+            <div class="flex items-center space-x-2 text-cyan-400 mb-3">
+              <i data-lucide="wind" class="w-5 h-5"></i>
+              <h3 class="font-bold text-base text-white">1. Drag-to-Webbing Elastic Force Coupling</h3>
+            </div>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              Total vehicle aerodynamic drag force $D$ is governed by hypersonic dynamic pressure $q_\infty$ and total inflated cross-sectional reference area $S(a)$. By Newton's second law, deceleration acceleration $a = D / m_{\text{veh}}$. In nominal states, total strap tension $F_{\text{web}}$ is a strictly monotonic function of drag:
+            </p>
+            
+            <div class="formula-box">
+              $$D = \frac{1}{2} \rho_\infty v_\infty^2 C_D(\text{Ma}, \delta_r) S(a) = m_{\text{veh}} \cdot a$$
+            </div>
+
+            <div class="formula-box">
+              $$F_{\text{web}, i}(\theta) = \frac{m_{\text{veh}} \cdot a}{N_{\text{straps}} \cos \phi} \left(1 + \frac{4 z_{\text{CoM}}}{D_{\text{flare}}} \tan \alpha \cos(\theta - \theta_0)\right) + k_t \delta_r$$
+            </div>
+            
+            <p class="text-[11px] text-slate-400 leading-relaxed mt-2">
+              Where $N_{\text{straps}}$ is the strap count, $\phi$ is the flare cone half-angle ($60^\circ$ for standard NASA HIAD), $\alpha$ is angle of attack, and $\delta_r$ is toroidal pressure-dependent radial flare deflection.
+            </p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-gray-800/80 text-[10px] font-mono text-cyan-300/80">
+            Nominal Phase Relationship: $\partial F_{\text{web}} / \partial a > 0$ strictly throughout hypersonic trajectory.
+          </div>
+        </div>
+
+        <!-- Card 2: Torus Thin-Shell Virial Deflation Physics -->
+        <div class="bg-[#080c14] border border-gray-800 rounded-2xl p-5 flex flex-col justify-between shadow-lg">
+          <div>
+            <div class="flex items-center space-x-2 text-amber-400 mb-3">
+              <i data-lucide="circle-dot" class="w-5 h-5"></i>
+              <h3 class="font-bold text-base text-white">2. Toroidal Pressure-Deflection Virial State</h3>
+            </div>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              The inflatable flare consists of stacked concentric toroids with internal gauge pressures $P_k$ (typically 100&ndash;150 kPa). Thin-walled torus membrane stress equilibrium relates structural rigidity to internal gas mass $n_k R T_k$:
+            </p>
+
+            <div class="formula-box">
+              $$\sigma_{\theta} = \frac{P_k r_{\text{tube}}}{2 t_{\text{wall}}} \left( \frac{2 R_k + r_{\text{tube}} \sin \theta}{R_k + r_{\text{tube}} \sin \theta} \right), \quad \delta_r(P_k) \approx \frac{F_{\text{aero}} R_k^2}{2 \pi E_{\text{kevlar}} I_t + P_k V_k}$$
+            </div>
+
+            <p class="text-xs text-slate-300 leading-relaxed">
+              If a puncture or micro-meteoroid seam rupture occurs, internal mass flow exhausts into vacuum:
+            </p>
+
+            <div class="formula-box">
+              $$\dot{m}_{\text{leak}} = C_d A_{\text{hole}} P_k \sqrt{\frac{\gamma}{R T_k} \left(\frac{2}{\gamma + 1}\right)^{\frac{\gamma+1}{\gamma-1}}}$$
+            </div>
+
+            <p class="text-[11px] text-slate-400 leading-relaxed mt-2">
+              Loss of $P_k$ collapses the local structural bending modulus, causing local strap slackening and an instantaneous downward divergence from the expected $(a, F)$ trajectory.
+            </p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-gray-800/80 text-[10px] font-mono text-amber-300/80">
+            Hazard Signature: High deceleration ($a > 10\,g$) accompanied by abrupt local tension drop ($\Delta F < -35\%$).
+          </div>
+        </div>
+
+        <!-- Card 3: Real-Time Diagnostic State Observer & Inversion -->
+        <div class="bg-[#080c14] border border-gray-800 rounded-2xl p-5 flex flex-col justify-between shadow-lg">
+          <div>
+            <div class="flex items-center space-x-2 text-emerald-400 mb-3">
+              <i data-lucide="cpu" class="w-5 h-5"></i>
+              <h3 class="font-bold text-base text-white">3. Kalman State Observer &amp; Anomaly Metric</h3>
+            </div>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              HyperShield executes an extended Kalman Filter (EKF) combining tri-axial IMU inertial decelerations ($\mathbf{a}$) with 200 Hz Fiber Bragg Grating (FBG) optical strap strain tensors ($\mathbf{\varepsilon} \propto \mathbf{F}$). The residual innovation vector $\mathbf{y}_k$:
+            </p>
+
+            <div class="formula-box">
+              $$\mathbf{y}_k = \mathbf{F}_{\text{meas}, k} - \mathbf{H}_k \hat{\mathbf{x}}_{k|k-1}(a_{\text{IMU}}, \hat{P}_{\text{nominal}})$$
+            </div>
+
+            <p class="text-xs text-slate-300 leading-relaxed">
+              The Normalized Innovation Squared (NIS) anomaly discriminant $\Lambda_k$ instantly trips autonomous safety state changes when statistical confidence exceeds $99.99\%$:
+            </p>
+
+            <div class="formula-box">
+              $$\Lambda_k = \mathbf{y}_k^T \mathbf{S}_k^{-1} \mathbf{y}_k > \chi_{N_{\text{straps}}, 0.9999}^2 \implies \text{TRIGGER TRIM ACTUATOR}$$
+            </div>
+
+            <p class="text-[11px] text-slate-400 leading-relaxed mt-2">
+              Unlike pressure sensors inside individual bladders—which suffer 2-second pneumatic lag through convoluted inflator hoses—structural tension relaxation propagates at the speed of sound in Kevlar ($v_s \approx 2,100\text{ m/s}$), providing instant &lt;15 ms detection.
+            </p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-gray-800/80 text-[10px] font-mono text-emerald-300/80">
+            Speed Advantage: Strain wave propagation in Kevlar is 140&times; faster than internal pneumatic plumbing response.
+          </div>
+        </div>
+
+        <!-- Card 4: Hardware Sensor Specifications & Micro-Fabrication -->
+        <div class="bg-[#080c14] border border-gray-800 rounded-2xl p-5 flex flex-col justify-between shadow-lg">
+          <div>
+            <div class="flex items-center space-x-2 text-purple-400 mb-3">
+              <i data-lucide="layers" class="w-5 h-5"></i>
+              <h3 class="font-bold text-base text-white">4. Micro-Fabrication &amp; Substrate Specs</h3>
+            </div>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              Aerothermal re-entry heating exceeds $1,400^\circ\text{C}$ on the outer FTPS, while internal toroids operate below $220^\circ\text{C}$. The HyperShield sensor harness embeds directly into the high-tensile structural spine:
+            </p>
+
+            <div class="formula-box">
+              $$\Delta \lambda_B = \lambda_B \left( (1 - p_e) \varepsilon + (\alpha_{\text{fiber}} + \xi) \Delta T \right)$$
+            </div>
+
+            <div class="space-y-2 mt-3 text-xs text-slate-300 font-mono">
+              <div class="flex justify-between border-b border-gray-800 pb-1">
+                <span class="text-slate-400">Optical Waveguide:</span>
+                <span class="text-white">Femtosecond-laser written Type-II FBG in Polyimide-coated silica</span>
+              </div>
+              <div class="flex justify-between border-b border-gray-800 pb-1">
+                <span class="text-slate-400">Thermal Threshold:</span>
+                <span class="text-white">-120&deg;C to +400&deg;C (Survives FTPS bleed)</span>
+              </div>
+              <div class="flex justify-between border-b border-gray-800 pb-1">
+                <span class="text-slate-400">Interrogator Sampling:</span>
+                <span class="text-white">200 Hz sweep rate, &plusmn;1.0 &mu;&epsilon; strain resolution</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-400">Trim Servo Authority:</span>
+                <span class="text-white">&plusmn;45 mm X-Y mass displacement, 3.2 kN thrust-equivalent moment</span>
+              </div>
+            </div>
+          </div>
+          <div class="mt-4 pt-3 border-t border-gray-800/80 text-[10px] font-mono text-purple-300/80">
+            Mass Impact: Entire sensor suite and interrogator adds &lt;1.85 kg to 6.0 m HIAD payload manifest.
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- TAB 3: NASA SBIR/STTR PROPOSAL & HARDWARE TRANSITION (#viewProposal)       -->
+    <!-- ========================================================================= -->
+    <div id="viewProposal" class="hidden space-y-6">
+      
+      <!-- Solicitation Metadata Banner -->
+      <div class="bg-[#080c14] border border-gray-800 rounded-2xl p-6 shadow-xl">
+        <div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-gray-800">
+          <div>
+            <div class="flex items-center space-x-2">
+              <span class="px-2.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 text-xs font-mono">
+                NASA SBIR 2026 Phase I
+              </span>
+              <span class="text-xs font-mono text-slate-400">Topic: Z7.02 &mdash; Entry, Descent, &amp; Landing (EDL) Architectures</span>
+            </div>
+            <h2 class="text-xl font-bold text-white mt-1">
+              HyperShield: High-Rate Aerodynamic Flare Inversion &amp; Autonomous Trim for HIAD
+            </h2>
+          </div>
+          <div class="flex items-center space-x-3">
+            <div class="bg-gray-950 px-4 py-2 rounded-xl border border-gray-800 text-right">
+              <span class="text-[10px] text-slate-400 font-mono block">PHASE I DURATION &amp; BUDGET</span>
+              <span class="text-lg font-bold font-mono text-cyan-400">$225,000 &bull; 6 Months</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Research Institution Partner Callout -->
+        <div class="my-4 p-4 rounded-xl bg-purple-950/30 border border-purple-500/40 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div class="flex items-center space-x-3">
+            <div class="p-2.5 bg-purple-600/20 text-purple-400 rounded-xl border border-purple-500/30">
+              <i data-lucide="graduation-cap" class="w-6 h-6"></i>
+            </div>
+            <div>
+              <h3 class="text-sm font-bold text-white">Academic Research Partner: University of Central Florida (UCF)</h3>
+              <p class="text-xs text-purple-200/80">Center for Advanced Turbomachinery and Energy Research (CATER) &amp; Hypersonic Aerodynamics Lab</p>
+            </div>
+          </div>
+          <div class="text-right font-mono bg-purple-950/80 px-3 py-1.5 rounded-lg border border-purple-800/60">
+            <span class="text-[10px] text-purple-300 block">MANDATORY STTR ALLOCATION</span>
+            <span class="text-sm font-bold text-cyan-300">30.0% ($67,500 Subcontract)</span>
+          </div>
+        </div>
+
+        <!-- Work Breakdown Schedule (Months 1-6) -->
+        <h3 class="text-sm font-bold text-slate-200 uppercase font-mono tracking-wider mb-3 mt-6">
+          Phase I Technical Work Plan &amp; Milestone Schedule
+        </h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          
+          <div class="p-4 rounded-xl bg-gray-950 border border-gray-800 flex flex-col justify-between">
+            <div>
+              <div class="flex justify-between items-center mb-2">
+                <span class="text-xs font-mono font-bold text-cyan-400">MILESTONE 1</span>
+                <span class="text-[10px] font-mono text-slate-400">Months 1&ndash;2</span>
+              </div>
+              <h4 class="text-xs font-bold text-white mb-1">Aero-Elastic CFD &amp; Strain Model</h4>
+              <p class="text-[11px] text-slate-400 leading-relaxed">
+                Execute coupled Mach 10&ndash;24 DPLR Navier-Stokes and LS-DYNA structural models at UCF CATER. Map $(a, F)$ nominal corridors under asymmetric shock impingement.
+              </p>
+            </div>
+            <div class="mt-3 pt-2 border-t border-gray-800 text-[10px] font-mono text-cyan-300">
+              Deliverable: Validated Aero-Structural Matrix
+            </div>
+          </div>
+
+          <div class="p-4 rounded-xl bg-gray-950 border border-gray-800 flex flex-col justify-between">
+            <div>
+              <div class="flex justify-between items-center mb-2">
+                <span class="text-xs font-mono font-bold text-cyan-400">MILESTONE 2</span>
+                <span class="text-[10px] font-mono text-slate-400">Months 3&ndash;4</span>
+              </div>
+              <h4 class="text-xs font-bold text-white mb-1">Inverse State Observer Algorithm</h4>
+              <p class="text-[11px] text-slate-400 leading-relaxed">
+                Formulate the 200 Hz EKF observer. Implement asymmetric bladder deflation identification, discriminating true ruptures from atmospheric turbulence in &lt;15 ms.
+              </p>
+            </div>
+            <div class="mt-3 pt-2 border-t border-gray-800 text-[10px] font-mono text-cyan-300">
+              Deliverable: Real-Time C++ Observer Code
+            </div>
+          </div>
+
+          <div class="p-4 rounded-xl bg-gray-950 border border-gray-800 flex flex-col justify-between">
+            <div>
+              <div class="flex justify-between items-center mb-2">
+                <span class="text-xs font-mono font-bold text-cyan-400">MILESTONE 3</span>
+                <span class="text-[10px] font-mono text-slate-400">Month 5</span>
+              </div>
+              <h4 class="text-xs font-bold text-white mb-1">Closed-Loop Trim Actuator Inversion</h4>
+              <p class="text-[11px] text-slate-400 leading-relaxed">
+                Connect the observer output to high-speed Center-of-Mass (CoM) mass-translation servo dynamics. Demonstrate autonomous roll/pitch recovery in 6-DOF Monte Carlo runs.
+              </p>
+            </div>
+            <div class="mt-3 pt-2 border-t border-gray-800 text-[10px] font-mono text-cyan-300">
+              Deliverable: 6-DOF Simulation Verification
+            </div>
+          </div>
+
+          <div class="p-4 rounded-xl bg-gray-950 border border-gray-800 flex flex-col justify-between">
+            <div>
+              <div class="flex justify-between items-center mb-2">
+                <span class="text-xs font-mono font-bold text-cyan-400">MILESTONE 4</span>
+                <span class="text-[10px] font-mono text-slate-400">Month 6</span>
+              </div>
+              <h4 class="text-xs font-bold text-white mb-1">Hardware-in-the-Loop Bench Test</h4>
+              <p class="text-[11px] text-slate-400 leading-relaxed">
+                Deploy 1:5 scale Kevlar torus arc in UCF thermo-mechanical test stand. Subject to rapid depressurization while FBG sensors drive physical trim servo counter-actuation.
+              </p>
+            </div>
+            <div class="mt-3 pt-2 border-t border-gray-800 text-[10px] font-mono text-cyan-300">
+              Deliverable: TRL 5 Phase II Transition Spec
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Phase II Roadmap Callout -->
+        <div class="mt-6 p-4 rounded-xl bg-cyan-950/20 border border-cyan-800/40 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div class="space-y-1">
+            <span class="text-xs font-bold text-cyan-300 font-mono flex items-center gap-2">
+              <i data-lucide="arrow-up-right" class="w-4 h-4"></i> NASA SBIR Phase II Follow-On Scope ($850,000 &ndash; $1.2M)
+            </span>
+            <p class="text-xs text-slate-300">
+              Integration into NASA Langley / Ames 6-meter flight test articles (following LOFTID heritage). Full arc-jet test validation at NASA Ames Interaction Heating Facility (IHF).
+            </p>
+          </div>
+          <button onclick="switchTab('sim')" class="whitespace-nowrap px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg font-mono text-xs font-semibold transition-all shadow-md">
+            Execute Phase I Sim
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- TAB 4: COMMERCIAL & NATIONWIDE ARR BREAKDOWN (#viewARR)                    -->
+    <!-- ========================================================================= -->
+    <div id="viewARR" class="hidden space-y-6">
+      
+      <!-- Top Commercial Executive Summary Banner -->
+      <div class="bg-gradient-to-r from-emerald-950/40 via-cyan-950/30 to-blue-950/40 border border-emerald-500/40 rounded-2xl p-6 shadow-xl">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <span class="px-2.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-xs font-mono">
+              CIVIL &amp; COMMERCIAL DUAL-USE ROADMAP
+            </span>
+            <h2 class="text-2xl font-bold text-white tracking-tight mt-1">
+              $208.4M Mature Annual Recurring Revenue (ARR)
+            </h2>
+            <p class="text-xs text-slate-300 max-w-2xl mt-1 leading-relaxed">
+              While engineered for NASA hypersonic planetary decel, HyperShield's core intellectual property&mdash;<strong>high-rate elastic-tension-to-inertial state inversion</strong>&mdash;solves catastrophic membrane, cable, and blimp structural monitoring across massive civil industrial markets.
+            </p>
+          </div>
+          <div class="text-right font-mono bg-gray-950/80 p-3.5 rounded-xl border border-gray-800">
+            <span class="text-[10px] text-slate-400 block uppercase">Enterprise Valuation (10x Multiple)</span>
+            <span class="text-xl font-bold text-emerald-400">$2.08 Billion</span>
+            <span class="text-[10px] text-slate-400 block mt-0.5">SaaS Diagnostic Licensing Model</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Commercial Market Distribution Table -->
+      <div class="bg-[#080c14] border border-gray-800 rounded-2xl p-5 shadow-xl overflow-hidden">
+        <h3 class="text-sm font-bold text-white font-mono uppercase tracking-wider mb-3 flex items-center gap-2">
+          <i data-lucide="table" class="w-4 h-4 text-cyan-400"></i>
+          Mature Civil ARR Breakdown Across 6 Industrial Sectors
+        </h3>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="border-b border-gray-800 text-slate-400 font-mono text-[11px] bg-gray-950/50">
+                <th class="py-3 px-3">Commercial Sector</th>
+                <th class="py-3 px-3">Target Asset Deployment</th>
+                <th class="py-3 px-3">SaaS / Edge License Model</th>
+                <th class="py-3 px-3">Total Asset Base</th>
+                <th class="py-3 px-3 text-right">Mature ARR ($M)</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-800/60 font-mono">
+              <tr class="hover:bg-gray-900/30 transition-colors">
+                <td class="py-3 px-3 font-sans font-semibold text-white flex items-center gap-2">
+                  <i data-lucide="rocket" class="w-3.5 h-3.5 text-cyan-400"></i> Commercial Orbital Re-entry
+                </td>
+                <td class="py-3 px-3 text-slate-300">Commercial cargo/sample return capsules (Varda, SpaceX, Sierra)</td>
+                <td class="py-3 px-3 text-slate-400">$45,000 / flight capsule mission license</td>
+                <td class="py-3 px-3 text-slate-400">620 flights/yr</td>
+                <td class="py-3 px-3 text-right font-bold text-cyan-400">$27.9M</td>
+              </tr>
+              <tr class="hover:bg-gray-900/30 transition-colors">
+                <td class="py-3 px-3 font-sans font-semibold text-white flex items-center gap-2">
+                  <i data-lucide="cloud-lightning" class="w-3.5 h-3.5 text-amber-400"></i> Stratospheric High-Alt Platforms
+                </td>
+                <td class="py-3 px-3 text-slate-300">Telecom &amp; environmental pseudo-satellites (HAPS &amp; blimps)</td>
+                <td class="py-3 px-3 text-slate-400">$18,000 / airframe / year real-time envelope monitor</td>
+                <td class="py-3 px-3 text-slate-400">2,400 craft</td>
+                <td class="py-3 px-3 text-right font-bold text-amber-400">$43.2M</td>
+              </tr>
+              <tr class="hover:bg-gray-900/30 transition-colors">
+                <td class="py-3 px-3 font-sans font-semibold text-white flex items-center gap-2">
+                  <i data-lucide="wind" class="w-3.5 h-3.5 text-emerald-400"></i> Offshore Floating Wind Turbines
+                </td>
+                <td class="py-3 px-3 text-slate-300">Deep-water tension-leg platform (TLP) synthetic mooring lines</td>
+                <td class="py-3 px-3 text-slate-400">$12,000 / turbine annual synthetic tendon strain observer</td>
+                <td class="py-3 px-3 text-slate-400">4,800 turbines</td>
+                <td class="py-3 px-3 text-right font-bold text-emerald-400">$57.6M</td>
+              </tr>
+              <tr class="hover:bg-gray-900/30 transition-colors">
+                <td class="py-3 px-3 font-sans font-semibold text-white flex items-center gap-2">
+                  <i data-lucide="anchor" class="w-3.5 h-3.5 text-purple-400"></i> Heavy Marine &amp; Crane Lift Cables
+                </td>
+                <td class="py-3 px-3 text-slate-300">Synthetic Dyneema/Kevlar crane hoist lines &amp; port container rigs</td>
+                <td class="py-3 px-3 text-slate-400">$3,500 / crane rig / year snap-back rupture prevention</td>
+                <td class="py-3 px-3 text-slate-400">8,900 units</td>
+                <td class="py-3 px-3 text-right font-bold text-purple-400">$31.1M</td>
+              </tr>
+              <tr class="hover:bg-gray-900/30 transition-colors">
+                <td class="py-3 px-3 font-sans font-semibold text-white flex items-center gap-2">
+                  <i data-lucide="landmark" class="w-3.5 h-3.5 text-rose-400"></i> Civil Tensile-Membrane Architecture
+                </td>
+                <td class="py-3 px-3 text-slate-300">Large airport concourses, stadium domes, &amp; radome covers</td>
+                <td class="py-3 px-3 text-slate-400">$8,500 / complex / yr snow/wind flutter tear detection</td>
+                <td class="py-3 px-3 text-slate-400">2,600 venues</td>
+                <td class="py-3 px-3 text-right font-bold text-rose-400">$22.1M</td>
+              </tr>
+              <tr class="hover:bg-gray-900/30 transition-colors">
+                <td class="py-3 px-3 font-sans font-semibold text-white flex items-center gap-2">
+                  <i data-lucide="plane" class="w-3.5 h-3.5 text-blue-400"></i> Commercial eVTOL Emergency Chutes
+                </td>
+                <td class="py-3 px-3 text-slate-300">Ballistic airframe recovery chutes &amp; riser line load sensors</td>
+                <td class="py-3 px-3 text-slate-400">$1,500 / aircraft annual fleet airworthiness monitor</td>
+                <td class="py-3 px-3 text-slate-400">17,700 craft</td>
+                <td class="py-3 px-3 text-right font-bold text-blue-400">$26.5M</td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr class="border-t-2 border-gray-700 bg-gray-950 font-mono text-xs">
+                <td colspan="4" class="py-3 px-3 font-bold text-white uppercase tracking-wider">
+                  Total Nationwide Mature Commercial ARR
+                </td>
+                <td class="py-3 px-3 text-right font-bold text-emerald-400 text-sm">
+                  $208.4M / year
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+
+      <!-- Deep Dive Cards for Each Vertical -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        <!-- Card 1 -->
+        <div class="bg-[#080c14] border border-gray-800 rounded-2xl p-5 shadow-lg space-y-3">
+          <div class="flex items-center space-x-2 text-cyan-400">
+            <i data-lucide="rocket" class="w-4 h-4"></i>
+            <h4 class="font-bold text-white text-sm">Commercial Orbital Re-entry &amp; Cargo Return</h4>
+          </div>
+          <div class="text-xs text-slate-300">
+            <span class="font-semibold text-cyan-300">Physics in 1 Sentence:</span>
+            Direct coupling of atmospheric decel with nosecone tension identifies hot plasma gas burn-through before boundary layer collapse.
+          </div>
+          <div class="text-xs text-slate-400">
+            <span class="font-semibold text-slate-200">Why Others Missed This:</span>
+            Legacy vehicles rely on post-entry thermocouple burn wires that only report heat penetration when the structural substrate is already fatally compromised.
+          </div>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="bg-[#080c14] border border-gray-800 rounded-2xl p-5 shadow-lg space-y-3">
+          <div class="flex items-center space-x-2 text-amber-400">
+            <i data-lucide="cloud-lightning" class="w-4 h-4"></i>
+            <h4 class="font-bold text-white text-sm">Stratospheric Long-Endurance HAPS</h4>
+          </div>
+          <div class="text-xs text-slate-300">
+            <span class="font-semibold text-amber-300">Physics in 1 Sentence:</span>
+            Differential envelope lift acceleration vs guy-wire strain detects micro-tears in solar-powered airships operating at 65,000 ft.
+          </div>
+          <div class="text-xs text-slate-400">
+            <span class="font-semibold text-slate-200">Why Others Missed This:</span>
+            Operators use internal pressure manometers which equalize across the entire envelope volume, hiding catastrophic localized pinholes until total loss of trim occurs.
+          </div>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="bg-[#080c14] border border-gray-800 rounded-2xl p-5 shadow-lg space-y-3">
+          <div class="flex items-center space-x-2 text-emerald-400">
+            <i data-lucide="wind" class="w-4 h-4"></i>
+            <h4 class="font-bold text-white text-sm">Offshore Floating Wind Turbine Tether Arrays</h4>
+          </div>
+          <div class="text-xs text-slate-300">
+            <span class="font-semibold text-emerald-300">Physics in 1 Sentence:</span>
+            Wave motion accelerations cross-referenced with synthetic mooring line tension isolate subsea tendon creep and unspooling fatigue.
+          </div>
+          <div class="text-xs text-slate-400">
+            <span class="font-semibold text-slate-200">Why Others Missed This:</span>
+            Current farms dispatch multimillion-dollar ROV dive teams once a year to visually inspect kilometers of underwater lines, missing high-cycle winter gale damage.
+          </div>
+        </div>
+
+        <!-- Card 4 -->
+        <div class="bg-[#080c14] border border-gray-800 rounded-2xl p-5 shadow-lg space-y-3">
+          <div class="flex items-center space-x-2 text-purple-400">
+            <i data-lucide="anchor" class="w-4 h-4"></i>
+            <h4 class="font-bold text-white text-sm">Heavy Port Crane Synthetic Rigging</h4>
+          </div>
+          <div class="text-xs text-slate-300">
+            <span class="font-semibold text-purple-300">Physics in 1 Sentence:</span>
+            Dynamic winch load $(a, F)$ phase tracking flags internal strand core shearing before explosive elastic snap-back decapitates deck workers.
+          </div>
+          <div class="text-xs text-slate-400">
+            <span class="font-semibold text-slate-200">Why Others Missed This:</span>
+            Stevedores rely on external visual chalk markings, blind to high-tensile HMPE core degradation masked beneath UV protective braided jackets.
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Bottom Partnership CTA Callout -->
+      <div class="p-6 rounded-2xl bg-gray-950 border border-gray-800 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div>
+          <h4 class="text-sm font-bold text-white">Commercial Licensing &amp; Aerospace SBIR Partnering</h4>
+          <p class="text-xs text-slate-400">Dual-use technology transfer, edge firmware licensing, and laboratory test data inquiries.</p>
+        </div>
+        <a href="mailto:support@rfwavecode.com" class="px-5 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-mono text-xs font-semibold flex items-center gap-2 transition-all shadow-md">
+          <i data-lucide="mail" class="w-4 h-4"></i>
+          support@rfwavecode.com
+        </a>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Global Footer -->
+  <footer class="border-t border-gray-900 bg-[#03050a] py-4 text-center text-xs text-slate-400 font-mono">
+    HyperShield Aerodynamic Decelerator Sensor &bull; NASA SBIR Topic Z7.02 &bull; UCF STTR Subcontract &bull; 2026 Flight Ready
+  </footer>
+
+  <!-- ========================================================================= -->
+  <!-- JAVASCRIPT ENGINE: Canvas Rendering, Chart.js Telemetry & MathJax Binding  -->
+  <!-- ========================================================================= -->
+  <script>
+    // --- 1. Tab Navigation & MathJax Typeset Trigger ---
+    const tabMapping = {
+      'sim': { viewId: 'viewSim', btnId: 'tabBtnSim' },
+      'physics': { viewId: 'viewPhysics', btnId: 'tabBtnPhysics' },
+      'proposal': { viewId: 'viewProposal', btnId: 'tabBtnProposal' },
+      'arr': { viewId: 'viewARR', btnId: 'tabBtnARR' }
+    };
+
+    function switchTab(targetKey) {
+      Object.keys(tabMapping).forEach(key => {
+        const item = tabMapping[key];
+        const viewEl = document.getElementById(item.viewId);
+        const btnEl = document.getElementById(item.btnId);
+        
+        if (key === targetKey) {
+          viewEl.classList.remove('hidden');
+          btnEl.className = 'px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all text-white bg-cyan-600/30 border border-cyan-500/40 shadow-sm flex items-center gap-1.5';
+        } else {
+          viewEl.classList.add('hidden');
+          btnEl.className = 'px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all text-slate-400 hover:text-white flex items-center gap-1.5';
+        }
+      });
+
+      // Rerender MathJax immediately
+      if (window.MathJax && window.MathJax.typesetPromise) {
+        window.MathJax.typesetPromise();
+      }
+
+      // If returning to sim, resize canvas and re-render
+      if (targetKey === 'sim') {
+        setTimeout(() => {
+          resizeCanvas();
+          renderCanvas();
+        }, 50);
+      }
+      
+      // Refresh icons
+      lucide.createIcons();
+    }
+
+    // --- 2. Simulation State Variables ---
+    const simState = {
+      decel: 4.2,              // g
+      aoa: 0.0,                // degrees
+      autoTrim: true,
+      faultActive: false,
+      faultType: null,         // 'puncture' | 'strapShear'
+      
+      // Dynamic physical state
+      pressure: 142.0,         // kPa
+      strapForce: 18.6,        // kN
+      oppStrapForce: 18.5,     // kN
+      flareDeflection: 3.4,    // mm
+      tumbleRisk: 0.02,        // %
+      comOffset: 0.0,          // mm (-45 to +45)
+      attitudeError: 0.08,     // deg
+      motorTorque: 12.4,       // N*m
+      
+      // Visual oscillation
+      time: 0,
+      phasePoints: []          // History for (a, F) scatter
+    };
+
+    // --- 3. HTML5 Canvas: Interactive HIAD Inflatable Aeroshell ---
+    const canvas = document.getElementById('aeroshellCanvas');
+    const ctx = canvas.getContext('2d');
+
+    function resizeCanvas() {
+      const rect = canvas.getBoundingClientRect();
+      const w = rect.width || 640;
+      const h = rect.height || 330;
+      canvas.width = w * window.devicePixelRatio;
+      canvas.height = h * window.devicePixelRatio;
+      ctx.resetTransform();
+      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+    }
+
+    window.addEventListener('resize', () => {
+      resizeCanvas();
+      renderCanvas();
+    });
+
+    function renderCanvas() {
+      const rect = canvas.getBoundingClientRect();
+      const w = rect.width || 640;
+      const h = rect.height || 330;
+      
+      ctx.clearRect(0, 0, w, h);
+
+      // Deep space grid & plasma wake background
+      ctx.strokeStyle = '#0e1626';
+      ctx.lineWidth = 1;
+      const gridSize = 35;
+      for (let x = 0; x < w; x += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, h);
+        ctx.stroke();
+      }
+      for (let y = 0; y < h; y += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(w, y);
+        ctx.stroke();
+      }
+
+      // Draw incoming hypersonic bow shock particles / flowlines
+      const speed = 4 + simState.decel * 0.4;
+      ctx.fillStyle = simState.faultActive ? 'rgba(239, 68, 68, 0.3)' : 'rgba(6, 182, 212, 0.25)';
+      for (let i = 0; i < 28; i++) {
+        const px = (w * 0.95 - ((simState.time * 60 + i * 45) % (w * 0.9)));
+        const py = (h * 0.5) + Math.sin(simState.time * 3 + i) * (h * 0.42);
+        ctx.beginPath();
+        ctx.arc(px, py, 1.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Vehicle Center Position
+      const cx = w * 0.48;
+      const cy = h * 0.5;
+      const angleRad = (simState.aoa + (simState.faultActive ? (simState.comOffset * -0.15) : 0)) * Math.PI / 180;
+
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(angleRad);
+
+      // Bow Shock Glow Arc
+      const shockDist = 80 + simState.decel * 2.5;
+      const shockGrad = ctx.createRadialGradient(-shockDist, 0, 10, -shockDist, 0, 140);
+      shockGrad.addColorStop(0, simState.decel > 12 ? 'rgba(249, 115, 22, 0.45)' : 'rgba(56, 189, 248, 0.3)');
+      shockGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      
+      ctx.fillStyle = shockGrad;
+      ctx.beginPath();
+      ctx.ellipse(-shockDist, 0, 35, 140, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Inflatable Torus Stacks (HIAD Toroids 1 to 6)
+      const toroidCount = 6;
+      const toroidRadius = 14;
+      const flareConeAngle = 60 * Math.PI / 180;
+
+      for (let i = 0; i < toroidCount; i++) {
+        const tIndex = i + 1;
+        const xOffset = -i * (toroidRadius * 1.55);
+        const yTop = -30 - (i * toroidRadius * 1.6);
+        const yBottom = 30 + (i * toroidRadius * 1.6);
+
+        // Check if this toroid has a puncture defect
+        const isDefectiveTop = (simState.faultActive && simState.faultType === 'puncture' && i === 3);
+        const radTop = isDefectiveTop ? toroidRadius * 0.6 : toroidRadius;
+        const radBottom = toroidRadius;
+
+        // Draw Upper Toroid Cross-Section
+        ctx.beginPath();
+        ctx.arc(xOffset, yTop, radTop, 0, Math.PI * 2);
+        ctx.fillStyle = isDefectiveTop ? '#991b1b' : '#1e293b';
+        ctx.fill();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = isDefectiveTop ? '#ef4444' : '#38bdf8';
+        ctx.stroke();
+
+        // Draw Lower Toroid Cross-Section
+        ctx.beginPath();
+        ctx.arc(xOffset, yBottom, radBottom, 0, Math.PI * 2);
+        ctx.fillStyle = '#1e293b';
+        ctx.fill();
+        ctx.strokeStyle = '#38bdf8';
+        ctx.stroke();
+
+        // Draw Gas Pressure Core Glow
+        if (!isDefectiveTop) {
+          ctx.beginPath();
+          ctx.arc(xOffset, yTop, radTop * 0.4, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(56, 189, 248, 0.6)';
+          ctx.fill();
+        }
+        ctx.beginPath();
+        ctx.arc(xOffset, yBottom, radBottom * 0.4, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(56, 189, 248, 0.6)';
+        ctx.fill();
+      }
+
+      // Outer Flexible Thermal Protection System (FTPS) Blanket Line
+      ctx.beginPath();
+      ctx.moveTo(-toroidCount * 22, -135);
+      ctx.quadraticCurveTo(-15, -45, 15, 0);
+      ctx.quadraticCurveTo(-15, 45, -toroidCount * 22, 135);
+      ctx.lineWidth = 4;
+      ctx.strokeStyle = simState.decel > 14 ? '#f97316' : '#fdba74';
+      ctx.stroke();
+
+      // Kevlar Webbing Straps (Radial & Axial Tension Lines)
+      const isSheared = (simState.faultActive && simState.faultType === 'strapShear');
+      
+      // Top Strap
+      ctx.beginPath();
+      ctx.moveTo(40, -10);
+      ctx.lineTo(-toroidCount * 18, -125);
+      ctx.lineWidth = isSheared ? 1 : 2.5;
+      ctx.strokeStyle = isSheared ? 'rgba(239, 68, 68, 0.4)' : '#06b6d4';
+      if (isSheared) ctx.setLineDash([4, 4]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Bottom Strap
+      ctx.beginPath();
+      ctx.moveTo(40, 10);
+      ctx.lineTo(-toroidCount * 18, 125);
+      ctx.lineWidth = 2.5;
+      ctx.strokeStyle = '#06b6d4';
+      ctx.stroke();
+
+      // Rigid Centerbody Payload Core
+      ctx.fillStyle = '#0f172a';
+      ctx.strokeStyle = '#64748b';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.roundRect(10, -28, 70, 56, 8);
+      ctx.fill();
+      ctx.stroke();
+
+      // Internal Trim Actuator Mass Slider
+      ctx.fillStyle = '#1e293b';
+      ctx.fillRect(20, -18, 50, 36);
+      
+      // Sliding Counter-Mass Block
+      const sliderY = (simState.comOffset / 45) * 14;
+      ctx.fillStyle = simState.faultActive ? '#10b981' : '#38bdf8';
+      ctx.beginPath();
+      ctx.roundRect(40, sliderY - 6, 18, 12, 3);
+      ctx.fill();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      // Sensor Interrogator Hub Glow
+      ctx.fillStyle = '#a855f7';
+      ctx.beginPath();
+      ctx.arc(28, 0, 4, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Defect Marker if rupture
+      if (simState.faultActive) {
+        ctx.fillStyle = '#ef4444';
+        ctx.font = 'bold 11px JetBrains Mono';
+        if (simState.faultType === 'puncture') {
+          ctx.fillText('⚠ TOROID 4 DEFLATION', -120, -90);
+        } else {
+          ctx.fillText('⚠ STRAP SHEARED', -110, -75);
+        }
+      }
+
+      ctx.restore();
+    }
+
+    // --- 4. Chart.js Setup: Primary Phase-Space & Telemetry Time-Series ---
+    
+    // (A) Phase-Space Chart: a vs F
+    const ctxPhase = document.getElementById('phaseSpaceChart').getContext('2d');
+    
+    // Generate static nominal baseline corridor points
+    const nominalBaseline = [];
+    const hazardThreshold = [];
+    for (let a = 1; a <= 22; a += 0.5) {
+      // Theoretical nominal: F = 4.4 * a + 0.05 * a^1.3
+      const fNom = 4.4 * a + 0.05 * Math.pow(a, 1.3);
+      nominalBaseline.push({ x: a, y: fNom });
+      // Hazard boundary: 35% lower than nominal
+      hazardThreshold.push({ x: a, y: fNom * 0.65 });
+    }
+
+    const phaseSpaceChart = new Chart(ctxPhase, {
+      type: 'scatter',
+      data: {
+        datasets: [
+          {
+            label: 'Nominal Aero Corridor',
+            data: nominalBaseline,
+            showLine: true,
+            borderColor: '#06b6d4',
+            borderWidth: 2,
+            pointRadius: 0,
+            fill: false,
+            tension: 0.2
+          },
+          {
+            label: 'Rupture Boundary Threshold',
+            data: hazardThreshold,
+            showLine: true,
+            borderColor: '#ef4444',
+            borderWidth: 1.5,
+            borderDash: [5, 5],
+            pointRadius: 0,
+            fill: {
+              target: 'origin',
+              above: 'rgba(239, 68, 68, 0.08)'
+            }
+          },
+          {
+            label: 'Current Dynamic State (a, F)',
+            data: [{ x: 4.2, y: 18.6 }],
+            pointBackgroundColor: '#ffffff',
+            pointBorderColor: '#38bdf8',
+            pointBorderWidth: 3,
+            pointRadius: 6,
+            pointHoverRadius: 8
+          },
+          {
+            label: 'Trajectory Trail',
+            data: [],
+            showLine: true,
+            borderColor: 'rgba(56, 189, 248, 0.4)',
+            borderWidth: 1.5,
+            pointRadius: 0
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: false,
+        scales: {
+          x: {
+            title: {
+              display: true,
+              text: 'Deceleration Acceleration a (g)',
+              color: '#94a3b8',
+              font: { family: 'JetBrains Mono', size: 10 }
+            },
+            grid: { color: '#1e293b' },
+            ticks: { color: '#64748b', font: { family: 'JetBrains Mono', size: 9 } },
+            min: 0,
+            max: 24
+          },
+          y: {
+            title: {
+              display: true,
+              text: 'Kevlar Strap Tensile Load F (kN)',
+              color: '#94a3b8',
+              font: { family: 'JetBrains Mono', size: 10 }
+            },
+            grid: { color: '#1e293b' },
+            ticks: { color: '#64748b', font: { family: 'JetBrains Mono', size: 9 } },
+            min: 0,
+            max: 120
+          }
+        },
+        plugins: {
+          legend: {
+            labels: {
+              color: '#cbd5e1',
+              font: { family: 'JetBrains Mono', size: 9 },
+              boxWidth: 12
+            }
+          }
+        }
+      }
+    });
+
+    // (B) Telemetry 1: Strap Tension Time-Series
+    const ctxTension = document.getElementById('tensionTimeChart').getContext('2d');
+    const timeLabels = Array.from({ length: 25 }, (_, i) => `${i}s`);
+    const initialTensionData = Array(25).fill(18.6);
+    const initialOppData = Array(25).fill(18.5);
+
+    const tensionTimeChart = new Chart(ctxTension, {
+      type: 'line',
+      data: {
+        labels: timeLabels,
+        datasets: [
+          {
+            label: 'Primary Strap Force (kN)',
+            data: [...initialTensionData],
+            borderColor: '#06b6d4',
+            borderWidth: 2,
+            pointRadius: 0,
+            tension: 0.2
+          },
+          {
+            label: 'Opposing Strap Force (kN)',
+            data: [...initialOppData],
+            borderColor: '#94a3b8',
+            borderWidth: 1.5,
+            borderDash: [3, 3],
+            pointRadius: 0,
+            tension: 0.2
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: false,
+        scales: {
+          x: {
+            grid: { display: false },
+            ticks: { color: '#475569', font: { family: 'JetBrains Mono', size: 8 } }
+          },
+          y: {
+            grid: { color: '#1e293b' },
+            ticks: { color: '#64748b', font: { family: 'JetBrains Mono', size: 8 } },
+            min: 0,
+            max: 110
+          }
+        },
+        plugins: {
+          legend: {
+            labels: { color: '#cbd5e1', font: { family: 'JetBrains Mono', size: 8 }, boxWidth: 10 }
+          }
+        }
+      }
+    });
+
+    // (C) Telemetry 2: Trim Angle & Counter-Moment
+    const ctxTrim = document.getElementById('trimTimeChart').getContext('2d');
+    const initialAoAData = Array(25).fill(0.08);
+    const initialTrimServoData = Array(25).fill(0.0);
+
+    const trimTimeChart = new Chart(ctxTrim, {
+      type: 'line',
+      data: {
+        labels: timeLabels,
+        datasets: [
+          {
+            label: 'Pitch AoA Error (°)',
+            data: [...initialAoAData],
+            borderColor: '#f59e0b',
+            borderWidth: 1.5,
+            pointRadius: 0,
+            tension: 0.2,
+            yAxisID: 'y'
+          },
+          {
+            label: 'CoM Trim Mass (mm)',
+            data: [...initialTrimServoData],
+            borderColor: '#10b981',
+            borderWidth: 2,
+            pointRadius: 0,
+            tension: 0.2,
+            yAxisID: 'y1'
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: false,
+        scales: {
+          x: {
+            grid: { display: false },
+            ticks: { color: '#475569', font: { family: 'JetBrains Mono', size: 8 } }
+          },
+          y: {
+            position: 'left',
+            grid: { color: '#1e293b' },
+            ticks: { color: '#f59e0b', font: { family: 'JetBrains Mono', size: 8 } },
+            min: -10,
+            max: 10
+          },
+          y1: {
+            position: 'right',
+            grid: { display: false },
+            ticks: { color: '#10b981', font: { family: 'JetBrains Mono', size: 8 } },
+            min: -50,
+            max: 50
+          }
+        },
+        plugins: {
+          legend: {
+            labels: { color: '#cbd5e1', font: { family: 'JetBrains Mono', size: 8 }, boxWidth: 10 }
+          }
+        }
+      }
+    });
+
+    // --- 5. Real-Time Physics Calculation & Loop ---
+    let frameCount = 0;
+
+    function physicsTick() {
+      simState.time += 0.04;
+      frameCount++;
+
+      const a = simState.decel;
+      
+      // Calculate Nominal Tension: F_nom = 4.4 * a + 0.05 * a^1.3
+      const fNom = 4.4 * a + 0.05 * Math.pow(a, 1.3);
+      
+      if (simState.faultActive) {
+        if (simState.faultType === 'puncture') {
+          // Drop strap force significantly
+          simState.strapForce = fNom * 0.52 + Math.sin(simState.time * 6) * 1.5;
+          simState.oppStrapForce = fNom * 0.98;
+          simState.pressure = 58.0; // kPa
+        } else {
+          // Sheared webbing
+          simState.strapForce = 1.2 + Math.sin(simState.time * 4) * 0.4;
+          simState.oppStrapForce = fNom * 1.05;
+          simState.pressure = 138.0;
+        }
+
+        // Autonomous Center-of-Mass Trim Inversion
+        if (simState.autoTrim) {
+          // Actuator slides to counteract the aerodynamic pitching moment caused by asymmetric flare collapse
+          const targetOffset = 28.5; // mm
+          simState.comOffset += (targetOffset - simState.comOffset) * 0.08;
+          simState.attitudeError = Math.max(0.12, (simState.attitudeError - 0.03));
+          simState.tumbleRisk = 0.04; // Kept low by auto trim
+        } else {
+          // No auto trim -> vehicle starts tumbling!
+          simState.comOffset = 0.0;
+          simState.attitudeError += 0.15;
+          simState.tumbleRisk = Math.min(99.4, simState.tumbleRisk + 1.2);
+        }
+
+      } else {
+        // Nominal flight state
+        const noise = (Math.sin(simState.time * 5) + Math.cos(simState.time * 11)) * 0.2;
+        simState.strapForce = fNom + noise;
+        simState.oppStrapForce = fNom - noise;
+        simState.pressure = 142.0;
+        simState.comOffset = 0.0;
+        simState.attitudeError = 0.05 + Math.abs(noise * 0.1);
+        simState.tumbleRisk = 0.02;
+      }
+
+      // Flare deflection mm
+      simState.flareDeflection = (3.2 * (a / 5) * (142 / simState.pressure)).toFixed(1);
+
+      // Record phase trajectory
+      simState.phasePoints.push({ x: a, y: simState.strapForce });
+      if (simState.phasePoints.length > 30) {
+        simState.phasePoints.shift();
+      }
+
+      // Update Phase-Space Chart Current Head and Trail
+      phaseSpaceChart.data.datasets[2].data = [{ x: a, y: simState.strapForce }];
+      phaseSpaceChart.data.datasets[3].data = [...simState.phasePoints];
+      phaseSpaceChart.update('none');
+
+      // Throttled time-series chart update every 4 ticks
+      if (frameCount % 4 === 0) {
+        // Tension chart
+        tensionTimeChart.data.datasets[0].data.shift();
+        tensionTimeChart.data.datasets[0].data.push(simState.strapForce);
+        tensionTimeChart.data.datasets[1].data.shift();
+        tensionTimeChart.data.datasets[1].data.push(simState.oppStrapForce);
+        tensionTimeChart.update('none');
+
+        // Trim chart
+        trimTimeChart.data.datasets[0].data.shift();
+        trimTimeChart.data.datasets[0].data.push(simState.attitudeError + simState.aoa);
+        trimTimeChart.data.datasets[1].data.shift();
+        trimTimeChart.data.datasets[1].data.push(simState.comOffset);
+        trimTimeChart.update('none');
+      }
+
+      // Update DOM Readouts
+      updateDOMReadouts();
+
+      // Render Canvas
+      renderCanvas();
+    }
+
+    function updateDOMReadouts() {
+      // Top stats
+      document.getElementById('statAccel').innerText = `${simState.decel.toFixed(1)} g`;
+      document.getElementById('statTension').innerText = `${simState.strapForce.toFixed(1)} kN`;
+      document.getElementById('statDeflection').innerText = `${simState.flareDeflection} mm`;
+      
+      const tumbleEl = document.getElementById('statTumble');
+      tumbleEl.innerText = `${simState.tumbleRisk.toFixed(1)}%`;
+      if (simState.tumbleRisk > 10) {
+        tumbleEl.className = 'text-sm font-bold text-rose-500 animate-pulse';
+      } else {
+        tumbleEl.className = 'text-sm font-bold text-emerald-400';
+      }
+
+      // Canvas overlays
+      document.getElementById('hudPressure').innerText = `${simState.pressure.toFixed(0)} kPa`;
+      document.getElementById('hudCoM').innerText = `${simState.comOffset.toFixed(1)} mm`;
+
+      // Status header badge
+      const statusBadge = document.getElementById('systemStatusBadge');
+      if (simState.faultActive) {
+        statusBadge.innerHTML = `<span class="h-2 w-2 rounded-full bg-rose-500 animate-ping"></span> RUPTURE OBSERVED &bull; TRIM ACTIVE`;
+        statusBadge.className = 'text-xs font-mono font-semibold text-rose-400 flex items-center justify-end gap-1';
+      } else {
+        statusBadge.innerHTML = `<span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span> NOMINAL BALANCE`;
+        statusBadge.className = 'text-xs font-mono font-semibold text-emerald-400 flex items-center justify-end gap-1';
+      }
+
+      // Telemetry readouts below charts
+      document.getElementById('telePrimaryStrap').innerText = `${simState.strapForce.toFixed(1)} kN`;
+      document.getElementById('teleOppStrap').innerText = `${simState.oppStrapForce.toFixed(1)} kN`;
+      document.getElementById('teleDeltaStrap').innerText = `${Math.abs(simState.strapForce - simState.oppStrapForce).toFixed(1)} kN`;
+
+      document.getElementById('teleAoAError').innerText = `${simState.attitudeError.toFixed(2)}°`;
+      document.getElementById('teleMotorTorque').innerText = `${(12.4 + (simState.comOffset * 0.8)).toFixed(1)} N·m`;
+    }
+
+    // --- 6. User Control Handlers ---
+    function updateControls() {
+      const decelVal = parseFloat(document.getElementById('sliderDecel').value);
+      const aoaVal = parseFloat(document.getElementById('sliderAoA').value);
+
+      simState.decel = decelVal;
+      simState.aoa = aoaVal;
+
+      document.getElementById('sliderValDecel').innerText = `${decelVal.toFixed(1)} g`;
+      document.getElementById('sliderValAoA').innerText = `${aoaVal >= 0 ? '+' : ''}${aoaVal.toFixed(1)}°`;
+
+      // Telemetry Mach and Alt sync with decel
+      const mach = Math.max(1.8, (24.0 - decelVal * 0.9)).toFixed(1);
+      const alt = Math.max(18.0, (75.0 - decelVal * 2.4)).toFixed(1);
+      const q = (decelVal * 9.8).toFixed(1);
+
+      document.getElementById('teleMach').innerText = mach;
+      document.getElementById('teleAlt').innerText = `${alt} km`;
+      document.getElementById('teleQ').innerText = `${q} kPa`;
+    }
+
+    function toggleAutoTrim() {
+      simState.autoTrim = document.getElementById('autoTrimToggle').checked;
+    }
+
+    function injectFault(type) {
+      simState.faultActive = true;
+      simState.faultType = type;
+      
+      const banner = document.getElementById('simAlertBanner');
+      banner.classList.remove('hidden');
+      banner.classList.add('flex');
+      
+      if (type === 'puncture') {
+        document.getElementById('trimFiringVal').innerText = '+28.4 mm Offset (Pitch Bias)';
+      } else {
+        document.getElementById('trimFiringVal').innerText = '+34.1 mm Offset (Roll Coupling)';
+      }
+    }
+
+    function resetSimulation() {
+      simState.faultActive = false;
+      simState.faultType = null;
+      simState.pressure = 142.0;
+      simState.comOffset = 0.0;
+      simState.attitudeError = 0.08;
+      simState.tumbleRisk = 0.02;
+
+      const banner = document.getElementById('simAlertBanner');
+      banner.classList.add('hidden');
+      banner.classList.remove('flex');
+    }
+
+    // --- 7. Initialization on Page Load ---
+    window.addEventListener('load', () => {
+      // Lucide icons
+      lucide.createIcons();
+      
+      // Init canvas
+      resizeCanvas();
+      renderCanvas();
+
+      // Start physics animation loop (40ms = 25 FPS update rate)
+      setInterval(physicsTick, 40);
+
+      // Trigger MathJax typeset
+      if (window.MathJax && window.MathJax.typesetPromise) {
+        window.MathJax.typesetPromise();
+      }
+    });
+  </script>
+</body>
+</html>
